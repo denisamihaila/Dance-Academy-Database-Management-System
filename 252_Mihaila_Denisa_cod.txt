@@ -1,0 +1,1126 @@
+-- *****************************************
+-- 4
+-- *****************************************
+
+
+DROP TABLE Participa CASCADE CONSTRAINTS;
+DROP TABLE Preda CASCADE CONSTRAINTS;
+DROP TABLE Coregrafie CASCADE CONSTRAINTS;
+DROP TABLE Curs CASCADE CONSTRAINTS;
+DROP TABLE Elev CASCADE CONSTRAINTS;
+DROP TABLE Instructor CASCADE CONSTRAINTS;
+DROP TABLE Competitie CASCADE CONSTRAINTS;
+DROP TABLE Sala CASCADE CONSTRAINTS;
+DROP TABLE Scoala CASCADE CONSTRAINTS;
+DROP TABLE Locatie CASCADE CONSTRAINTS;
+DROP TABLE Abonament CASCADE CONSTRAINTS;
+DROP TABLE Stil CASCADE CONSTRAINTS;
+
+CREATE TABLE Abonament (
+    id_abonament INT,
+    denumire VARCHAR2(100),
+    pret INT,
+    sedinte INT,
+    CONSTRAINT abonament_pk PRIMARY KEY (id_abonament)
+);
+
+CREATE TABLE Locatie (
+    id_locatie INT,
+    localitate VARCHAR2(100),
+    strada VARCHAR2(100),
+    numar INT,
+    CONSTRAINT locatie_pk PRIMARY KEY (id_locatie)
+);
+
+CREATE TABLE Scoala (
+    id_scoala INT,
+    denumire VARCHAR2(100),
+    id_locatie INT CONSTRAINT scoala_locatie_nn NOT NULL,
+    CONSTRAINT scoala_pk PRIMARY KEY (id_scoala),
+    CONSTRAINT scoala_locatie_fk FOREIGN KEY (id_locatie)
+        REFERENCES Locatie(id_locatie)
+);
+
+CREATE TABLE Sala (
+    id_sala INT,
+    denumire VARCHAR2(100),
+    capacitate INT,
+    id_scoala INT CONSTRAINT sala_scoala_nn NOT NULL,
+    CONSTRAINT sala_pk PRIMARY KEY (id_sala),
+    CONSTRAINT sala_scoala_fk FOREIGN KEY (id_scoala)
+        REFERENCES Scoala(id_scoala)
+);
+
+CREATE TABLE Stil (
+    id_stil INT,
+    denumire VARCHAR2(100),
+    CONSTRAINT stil_pk PRIMARY KEY (id_stil)
+);
+
+CREATE TABLE Instructor (
+    id_instructor INT,
+    nume VARCHAR2(100),
+    prenume VARCHAR2(100),
+    data_nasterii DATE,
+    CONSTRAINT instructor_pk PRIMARY KEY (id_instructor)
+);
+
+CREATE TABLE Coregrafie (
+    id_coregrafie INT,
+    melodie VARCHAR2(100),
+    id_stil INT CONSTRAINT coregrafie_stil_nn NOT NULL,
+    id_instructor INT CONSTRAINT coregrafie_instructor_nn NOT NULL,
+    CONSTRAINT coregrafie_pk PRIMARY KEY (id_coregrafie),
+    CONSTRAINT coregrafie_stil_fk FOREIGN KEY (id_stil)
+        REFERENCES Stil(id_stil) ON DELETE CASCADE,
+    CONSTRAINT coregrafie_instructor_fk FOREIGN KEY (id_instructor)
+        REFERENCES Instructor(id_instructor) ON DELETE CASCADE
+);
+
+CREATE TABLE Curs (
+    id_curs INT,
+    denumire VARCHAR2(100),
+    id_stil INT CONSTRAINT curs_stil_nn NOT NULL,
+    id_sala INT CONSTRAINT curs_sala_nn NOT NULL,
+    CONSTRAINT curs_pk PRIMARY KEY (id_curs),
+    CONSTRAINT curs_stil_fk FOREIGN KEY (id_stil)
+        REFERENCES Stil(id_stil),
+    CONSTRAINT curs_sala_fk FOREIGN KEY (id_sala)
+        REFERENCES Sala(id_sala)
+);
+
+CREATE TABLE Elev (
+    id_elev INT,
+    nume VARCHAR2(100),
+    prenume VARCHAR2(100),
+    data_nasterii DATE,
+    data_inscrierii DATE,
+    id_abonament INT CONSTRAINT elev_abonament_nn NOT NULL,
+    id_scoala INT CONSTRAINT elev_scoala_nn NOT NULL,
+    CONSTRAINT elev_pk PRIMARY KEY (id_elev),
+    CONSTRAINT elev_abonament_fk FOREIGN KEY (id_abonament)
+        REFERENCES Abonament(id_abonament) ON DELETE SET NULL,
+    CONSTRAINT elev_scoala_fk FOREIGN KEY (id_scoala)
+        REFERENCES Scoala(id_scoala)
+);
+
+CREATE TABLE Competitie (
+    id_competitie INT,
+    denumire VARCHAR2(100),
+    data DATE,
+    CONSTRAINT competitie_pk PRIMARY KEY (id_competitie)
+);
+
+CREATE TABLE Participa (
+    id_elev INT CONSTRAINT participa_elev_nn NOT NULL,
+    id_competitie INT CONSTRAINT participa_competitie_nn NOT NULL,
+    premiu INT,
+    CONSTRAINT participa_pk PRIMARY KEY (id_elev, id_competitie),
+    CONSTRAINT participa_elev_fk FOREIGN KEY (id_elev)
+        REFERENCES Elev(id_elev),
+    CONSTRAINT participa_competitie_fk FOREIGN KEY (id_competitie)
+        REFERENCES Competitie(id_competitie)
+);
+
+CREATE TABLE Preda (
+    id_scoala INT CONSTRAINT preda_scoala_nn NOT NULL,
+    id_instructor INT CONSTRAINT preda_instructor_nn NOT NULL,
+    id_curs INT CONSTRAINT preda_curs_nn NOT NULL,
+    ziua VARCHAR2(50),
+    ora INT,
+    CONSTRAINT preda_pk PRIMARY KEY (id_scoala, id_instructor, id_curs),
+    CONSTRAINT preda_scoala_fk FOREIGN KEY (id_scoala)
+        REFERENCES Scoala(id_scoala),
+    CONSTRAINT preda_instructor_fk FOREIGN KEY (id_instructor)
+        REFERENCES Instructor(id_instructor),
+    CONSTRAINT preda_curs_fk FOREIGN KEY (id_curs)
+        REFERENCES Curs(id_curs)
+);
+
+DROP SEQUENCE locatie_seq;
+DROP SEQUENCE scoala_seq;
+DROP SEQUENCE sala_seq;
+DROP SEQUENCE abonament_seq;
+DROP SEQUENCE stil_seq;
+DROP SEQUENCE instructor_seq;
+DROP SEQUENCE coregrafie_seq;
+DROP SEQUENCE curs_seq;
+DROP SEQUENCE elev_seq;
+DROP SEQUENCE competitie_seq;
+
+CREATE SEQUENCE abonament_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE locatie_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE scoala_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE sala_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE stil_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE instructor_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE coregrafie_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE curs_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE elev_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE competitie_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+COMMIT;
+
+
+-- *****************************************
+-- 5
+-- *****************************************
+
+
+INSERT INTO Abonament (id_abonament, denumire, pret, sedinte) 
+VALUES (abonament_seq.NEXTVAL, 'PRO', 450, 12);
+
+INSERT INTO Abonament (id_abonament, denumire, pret, sedinte) 
+VALUES (abonament_seq.NEXTVAL, 'PLATINUM', 320, 8);
+
+INSERT INTO Abonament (id_abonament, denumire, pret, sedinte) 
+VALUES (abonament_seq.NEXTVAL, 'GOLD', 170, 4);
+
+INSERT INTO Abonament (id_abonament, denumire, pret, sedinte) 
+VALUES (abonament_seq.NEXTVAL, 'SILVER', 90, 2);
+
+INSERT INTO Abonament (id_abonament, denumire, pret, sedinte) 
+VALUES (abonament_seq.NEXTVAL, 'BRONZE', 50, 1);
+
+
+INSERT INTO Locatie (id_locatie, localitate, strada, numar) 
+VALUES (locatie_seq.NEXTVAL, 'Bucuresti', 'Strada Corbeni', 19);
+
+INSERT INTO Locatie (id_locatie, localitate, strada, numar) 
+VALUES (locatie_seq.NEXTVAL, 'Cluj-Napoca', 'Strada Rovine', 4);
+
+INSERT INTO Locatie (id_locatie, localitate, strada, numar) 
+VALUES (locatie_seq.NEXTVAL, 'Iasi', 'Aleea Decebal', 10);
+
+INSERT INTO Locatie (id_locatie, localitate, strada, numar) 
+VALUES (locatie_seq.NEXTVAL, 'Timisoara', 'Strada Letea', 8);
+
+INSERT INTO Locatie (id_locatie, localitate, strada, numar) 
+VALUES (locatie_seq.NEXTVAL, 'Constanta', 'Strada Ostrov', 12);
+
+INSERT INTO Locatie (id_locatie, localitate, strada, numar) 
+VALUES (locatie_seq.NEXTVAL, 'Galati', 'Strada Frunzei', 16);
+
+
+INSERT INTO Scoala (id_scoala, denumire, id_locatie) 
+VALUES (scoala_seq.NEXTVAL, 'Dance Prestige', 1);
+
+INSERT INTO Scoala (id_scoala, denumire, id_locatie) 
+VALUES (scoala_seq.NEXTVAL, 'CHIC Dance Studio', 2);
+
+INSERT INTO Scoala (id_scoala, denumire, id_locatie) 
+VALUES (scoala_seq.NEXTVAL, 'Bel Art', 3);
+
+INSERT INTO Scoala (id_scoala, denumire, id_locatie) 
+VALUES (scoala_seq.NEXTVAL, 'Scoala de Dans Bolero', 4);
+
+INSERT INTO Scoala (id_scoala, denumire, id_locatie) 
+VALUES (scoala_seq.NEXTVAL, 'Black Sea Dance Studio', 5);
+
+INSERT INTO Scoala (id_scoala, denumire, id_locatie) 
+VALUES (scoala_seq.NEXTVAL, 'Tempo Dance', 6);
+
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Power', 30, 1);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Studio', 25, 1);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Hallway', 30, 2);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Studio 1', 40, 3);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Studio 2', 15, 3);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Havana', 20, 4);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Rio', 25, 4);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Elegance', 50, 5);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Royal', 18, 6);
+
+INSERT INTO Sala (id_sala, denumire, capacitate, id_scoala) 
+VALUES (sala_seq.NEXTVAL, 'Sala Golden', 24, 6);
+
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Salsa');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Bachata');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Vals');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Samba');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Hip Hop');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Reggaeton');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Balet');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Jazz');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Dancehall');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Commercial');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Shuffle');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Street');
+
+INSERT INTO Stil (id_stil, denumire) 
+VALUES (stil_seq.NEXTVAL, 'Heels');
+
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Popescu', 'Andrei', TO_DATE('12-03-1985', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Ionescu', 'Maria', TO_DATE('25-06-1990', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Dumitrescu', 'Alex', TO_DATE('04-11-1988', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Georgescu', 'Ioana', TO_DATE('19-08-1993', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Stan', 'Daniela', TO_DATE('15-01-1987', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Munteanu', 'Cristian', TO_DATE('23-09-1998', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Radu', 'Alexandra', TO_DATE('11-12-2002', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Marinescu', 'Gabriel', TO_DATE('03-06-1991', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Badescu', 'Elena', TO_DATE('27-01-1989', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Grigorescu', 'Victor', TO_DATE('14-05-1995', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Lungu', 'Corina', TO_DATE('08-07-2000', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Tudor', 'Vlad', TO_DATE('19-02-1986', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Serban', 'Maria', TO_DATE('04-03-1997', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Ungureanu', 'Alex', TO_DATE('16-11-1990', 'DD-MM-YYYY'));
+
+INSERT INTO Instructor (id_instructor, nume, prenume, data_nasterii) 
+VALUES (instructor_seq.NEXTVAL, 'Mihaila', 'Bianca', TO_DATE('09-10-1999', 'DD-MM-YYYY'));
+
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Havana', 1, 1);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Bailando', 2, 2);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Perfect', 3, 3);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Magalenha', 4, 4);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'In Da Club', 5, 5);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Despacito', 6, 6);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Swan Lake Theme', 7, 7);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Feeling Good', 8, 8);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Temperature', 9, 9);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Shape of You', 10, 10);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Faded', 11, 11);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Uptown Funk', 12, 12);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Single Ladies', 13, 13);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'We Don’t Talk About Bruno', 2, 14);
+
+INSERT INTO Coregrafie (id_coregrafie, melodie, id_stil, id_instructor) 
+VALUES (coregrafie_seq.NEXTVAL, 'Lose Yourself', 5, 15);
+
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Salsa Tropical', 1, 1);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Bachata Sensual', 2, 2);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Vals Vienez', 3, 3);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Samba Carnaval', 4, 4);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Hip-Hop Coregrafie', 5, 5);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Reggaeton Beat', 6, 2);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Balet pentru Începători', 7, 3);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Jazz Modern', 8, 4);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Dancehall Freestyle', 9, 1);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Commercial Moves', 10, 2);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Shuffle Steps', 11, 3);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Street Performance', 12, 4);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Fierce on Heels', 13, 5);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Salsa Social', 1, 3);
+
+INSERT INTO Curs (id_curs, denumire, id_stil, id_sala) 
+VALUES (curs_seq.NEXTVAL, 'Bachata Intensiv', 2, 4);
+
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Popa', 'Ana', TO_DATE('14-07-2005', 'DD-MM-YYYY'), TO_DATE('10-01-2024', 'DD-MM-YYYY'), 1, 1);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Ionescu', 'Vlad', TO_DATE('03-11-2002', 'DD-MM-YYYY'), TO_DATE('12-03-2023', 'DD-MM-YYYY'), 2, 1);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Radu', 'Mihai', TO_DATE('25-12-1998', 'DD-MM-YYYY'), TO_DATE('01-02-2022', 'DD-MM-YYYY'), 3, 2);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Dobre', 'Maria', TO_DATE('19-08-2000', 'DD-MM-YYYY'), TO_DATE('02-04-2023', 'DD-MM-YYYY'), 1, 2);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Munteanu', 'Ioan', TO_DATE('18-10-2000', 'DD-MM-YYYY'), TO_DATE('05-03-2024', 'DD-MM-YYYY'), 4, 3);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Iliescu', 'Teodora', TO_DATE('22-06-1999', 'DD-MM-YYYY'), TO_DATE('28-01-2021', 'DD-MM-YYYY'), 2, 3);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Dima', 'Alexandra', TO_DATE('30-03-1997', 'DD-MM-YYYY'), TO_DATE('20-04-2023', 'DD-MM-YYYY'), 5, 4);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Petrescu', 'Andrei', TO_DATE('14-05-2001', 'DD-MM-YYYY'), TO_DATE('04-05-2022', 'DD-MM-YYYY'), 1, 5);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Voinea', 'Cristian', TO_DATE('22-08-2003', 'DD-MM-YYYY'), TO_DATE('15-05-2024', 'DD-MM-YYYY'), 5, 5);
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala) 
+VALUES (elev_seq.NEXTVAL, 'Ciobanu', 'Diana', TO_DATE('08-12-2004', 'DD-MM-YYYY'), TO_DATE('10-06-2023', 'DD-MM-YYYY'), 4, 6);
+
+
+INSERT INTO Competitie (id_competitie, denumire, data) 
+VALUES (competitie_seq.NEXTVAL, 'Campionatul National de Dans', TO_DATE('25-03-2023', 'DD-MM-YYYY'));
+
+INSERT INTO Competitie (id_competitie, denumire, data) 
+VALUES (competitie_seq.NEXTVAL, 'Gala Ritmurilor', TO_DATE('10-05-2023', 'DD-MM-YYYY'));
+
+INSERT INTO Competitie (id_competitie, denumire, data) 
+VALUES (competitie_seq.NEXTVAL, 'Festivalul Dansului', TO_DATE('15-06-2024', 'DD-MM-YYYY'));
+
+INSERT INTO Competitie (id_competitie, denumire, data) 
+VALUES (competitie_seq.NEXTVAL, 'Noaptea Ritmurilor', TO_DATE('20-07-2024', 'DD-MM-YYYY'));
+
+INSERT INTO Competitie (id_competitie, denumire, data) 
+VALUES (competitie_seq.NEXTVAL, 'Euforia Dansului', TO_DATE('30-08-2024', 'DD-MM-YYYY'));
+
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (1, 1, 1);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (2, 1, 2);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (3, 2, 3);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (4, 2, 1);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (5, 3, 2);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (6, 3, 3);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (7, 4, 1);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (8, 4, 2);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (9, 5, 1);
+
+INSERT INTO Participa (id_elev, id_competitie, premiu) 
+VALUES (10, 5, 3);
+
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (1, 1, 1, 'Luni', 18);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (1, 2, 9, 'Miercuri', 19);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (2, 3, 2, 'Marti', 17);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (2, 4, 10, 'Vineri', 20);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (3, 5, 3, 'Joi', 16);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (3, 6, 7, 'Luni', 18);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (4, 7, 4, 'Sambata', 14);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (4, 8, 12, 'Duminica', 16);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (5, 9, 5, 'Marti', 19);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (5, 10, 13, 'Joi', 20);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (6, 11, 6, 'Luni', 17);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (6, 12, 8, 'Miercuri', 18);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (3, 13, 11, 'Sambata', 15);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (4, 14, 14, 'Vineri', 19);
+
+INSERT INTO Preda (id_scoala, id_instructor, id_curs, ziua, ora) 
+VALUES (2, 15, 15, 'Duminica', 14);
+
+
+-- *****************************************
+-- 6
+-- *****************************************
+
+
+DECLARE
+  TYPE elevi_table IS TABLE OF VARCHAR2(200) INDEX BY PLS_INTEGER;
+  elevi elevi_table;
+
+  TYPE premii_table IS TABLE OF VARCHAR2(200);
+  premii premii_table := premii_table();
+
+  TYPE top_performante IS VARRAY(2) OF VARCHAR2(200);
+  top_premii top_performante := top_performante();
+
+  TYPE premiu_counter IS TABLE OF PLS_INTEGER INDEX BY PLS_INTEGER;
+  total_premii premiu_counter;
+
+  v_index PLS_INTEGER := 0;
+  v_scoala_id NUMBER := 1;
+BEGIN
+  FOR rec IN (
+    SELECT e.id_elev, e.nume || ' ' || e.prenume AS nume_complet
+    FROM Elev e
+    WHERE e.id_scoala = v_scoala_id
+  ) LOOP
+    v_index := v_index + 1;
+    elevi(v_index) := rec.nume_complet;
+    total_premii(v_index) := 0;
+  END LOOP;
+
+  IF v_index = 0 THEN
+    DBMS_OUTPUT.PUT_LINE('ID Scoala: ' || v_scoala_id);
+    DBMS_OUTPUT.PUT_LINE('Nu exista elevi in aceasta scoala');
+    RETURN;
+  END IF;
+
+  DBMS_OUTPUT.PUT_LINE('ID Scoala: ' || v_scoala_id);
+  DBMS_OUTPUT.PUT_LINE('Elevi participanti:');
+  FOR i IN 1..v_index LOOP
+    DBMS_OUTPUT.PUT_LINE(i || '. ' || elevi(i));
+  END LOOP;
+
+  FOR rec IN (
+    SELECT e.nume || ' ' || e.prenume || ' - Premiu: ' || p.premiu AS detalii_premiu, e.nume || ' ' || e.prenume AS nume_complet, p.premiu
+    FROM Participa p
+    JOIN Elev e ON p.id_elev = e.id_elev
+    WHERE e.id_scoala = v_scoala_id
+    ORDER BY p.premiu ASC
+  ) LOOP
+    IF rec.premiu IS NOT NULL THEN
+      premii.EXTEND;
+      premii(premii.COUNT) := rec.detalii_premiu;
+
+      FOR i IN 1..v_index LOOP
+        IF elevi(i) = rec.nume_complet THEN
+          total_premii(i) := total_premii(i) + 1;
+        END IF;
+      END LOOP;
+    END IF;
+  END LOOP;
+
+  IF premii.COUNT = 0 THEN
+    DBMS_OUTPUT.PUT_LINE('Nu exista premii pentru elevii din aceasta scoala');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Premii obtinute:');
+    FOR i IN 1..premii.COUNT LOOP
+      DBMS_OUTPUT.PUT_LINE(premii(i));
+    END LOOP;
+
+    FOR i IN 1..LEAST(2, premii.COUNT) LOOP
+      top_premii.EXTEND;
+      top_premii(i) := premii(i);
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE('Top performante:');
+    FOR i IN 1..top_premii.COUNT LOOP
+      DBMS_OUTPUT.PUT_LINE('Locul ' || i || ': ' || top_premii(i));
+    END LOOP;
+  END IF;
+
+  DBMS_OUTPUT.PUT_LINE('Total premii per elev:');
+  FOR i IN 1..v_index LOOP
+    DBMS_OUTPUT.PUT_LINE(elevi(i) || ' - Total Premii: ' || total_premii(i));
+  END LOOP;
+END;
+
+
+-- *****************************************
+-- 7
+-- *****************************************
+
+
+DECLARE
+  CURSOR c_instructori IS
+    SELECT DISTINCT i.id_instructor, i.nume || ' ' || i.prenume AS nume_complet
+    FROM Instructor i
+    JOIN Preda p ON i.id_instructor = p.id_instructor
+    WHERE p.id_scoala = 3;
+
+  CURSOR c_cursuri (p_id_instructor NUMBER) IS
+    SELECT c.denumire, s.denumire AS sala, st.denumire AS stil
+    FROM Curs c
+    JOIN Preda p ON c.id_curs = p.id_curs
+    JOIN Sala s ON c.id_sala = s.id_sala
+    JOIN Stil st ON c.id_stil = st.id_stil
+    WHERE p.id_instructor = p_id_instructor;
+
+  v_instructor_id NUMBER;
+  v_nume_instructor VARCHAR2(200);
+  v_denumire_curs VARCHAR2(200);
+  v_sala VARCHAR2(200);
+  v_stil VARCHAR2(200);
+  v_total_cursuri NUMBER := 0;
+  v_total_instructori NUMBER := 0;
+  v_cursuri_per_instructor NUMBER := 0;
+BEGIN
+  OPEN c_instructori;
+
+  LOOP
+    FETCH c_instructori INTO v_instructor_id, v_nume_instructor;
+    EXIT WHEN c_instructori%NOTFOUND;
+
+    v_total_instructori := v_total_instructori + 1;
+    v_cursuri_per_instructor := 0;
+
+    DBMS_OUTPUT.PUT_LINE('Instructor: ' || v_nume_instructor);
+    DBMS_OUTPUT.PUT_LINE('Cursuri predate:');
+
+    OPEN c_cursuri(v_instructor_id);
+
+    LOOP
+      FETCH c_cursuri INTO v_denumire_curs, v_sala, v_stil;
+      EXIT WHEN c_cursuri%NOTFOUND;
+
+      v_cursuri_per_instructor := v_cursuri_per_instructor + 1;
+      v_total_cursuri := v_total_cursuri + 1;
+
+      DBMS_OUTPUT.PUT_LINE('  - Curs: ' || v_denumire_curs || ' | Sala: ' || v_sala || ' | Stil: ' || v_stil);
+    END LOOP;
+
+    CLOSE c_cursuri;
+
+    DBMS_OUTPUT.PUT_LINE('Total cursuri predate de  ' || v_nume_instructor || ': ' || v_cursuri_per_instructor);
+    DBMS_OUTPUT.PUT_LINE('------------------------------');
+  END LOOP;
+
+  CLOSE c_instructori;
+
+  DBMS_OUTPUT.PUT_LINE('Total instructori: ' || v_total_instructori);
+  DBMS_OUTPUT.PUT_LINE('Total cursuri: ' || v_total_cursuri);
+END;
+
+
+-- *****************************************
+-- 8
+-- *****************************************
+
+
+CREATE OR REPLACE FUNCTION obtine_elev_premiu (
+    p_premiu INT
+) RETURN VARCHAR2 IS
+    v_rezultat VARCHAR2(4000);
+BEGIN
+    SELECT e.nume || ' ' || e.prenume || ' - ' || s.denumire
+    INTO v_rezultat
+    FROM Elev e
+    JOIN Scoala s ON e.id_scoala = s.id_scoala
+    JOIN Participa p ON e.id_elev = p.id_elev
+    WHERE p.premiu = p_premiu;
+
+    RETURN v_rezultat;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'Nu exista elevi cu premiul specificat';
+    WHEN TOO_MANY_ROWS THEN
+        RETURN 'Exista mai multi elevi cu acest premiu';
+    WHEN OTHERS THEN
+        RETURN 'Alta eroare!';
+END obtine_elev_premiu;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(obtine_elev_premiu(1));
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(obtine_elev_premiu(9));
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(obtine_elev_premiu(4));
+END;
+/
+
+
+-- *****************************************
+-- 9
+-- *****************************************
+
+
+CREATE OR REPLACE PROCEDURE obtine_instructori_stil (
+    p_id_stil IN INT,
+    p_id_scoala IN INT
+) IS
+    v_count_stil INT;
+    v_count_scoala INT;
+    v_count_cursuri INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_count_stil
+    FROM Stil
+    WHERE id_stil = p_id_stil;
+
+    IF v_count_stil = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Nu exista stilul specificat');
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_count_scoala
+    FROM Scoala
+    WHERE id_scoala = p_id_scoala;
+
+    IF v_count_scoala = 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Nu exista scoala specificata');
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_count_cursuri
+    FROM Instructor i
+    JOIN Preda pr ON i.id_instructor = pr.id_instructor
+    JOIN Curs c ON pr.id_curs = c.id_curs
+    JOIN Stil s ON c.id_stil = s.id_stil
+    JOIN Scoala sc ON pr.id_scoala = sc.id_scoala
+    WHERE c.id_stil = p_id_stil AND pr.id_scoala = p_id_scoala;
+
+    IF v_count_cursuri = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Nu exista cursuri care sa indeplineasca criteriile');
+    END IF;
+
+    FOR rec IN (
+        SELECT i.nume || ' ' || i.prenume AS nume_instructor,
+               c.denumire AS curs,
+               pr.ziua AS ziua,
+               pr.ora AS ora
+        FROM Instructor i
+        JOIN Preda pr ON i.id_instructor = pr.id_instructor
+        JOIN Curs c ON pr.id_curs = c.id_curs
+        JOIN Stil s ON c.id_stil = s.id_stil
+        JOIN Scoala sc ON pr.id_scoala = sc.id_scoala
+        WHERE c.id_stil = p_id_stil AND pr.id_scoala = p_id_scoala
+        ORDER BY i.nume, c.denumire
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Instructor: ' || rec.nume_instructor);
+        DBMS_OUTPUT.PUT_LINE('  Curs: ' || rec.curs || ' | Ziua: ' || rec.ziua || ' | Ora: ' || rec.ora);
+    END LOOP;
+    
+    DBMS_OUTPUT.PUT_LINE('------------------------------');
+    DBMS_OUTPUT.PUT_LINE('Total cursuri care indeplinesc criteriile: ' || v_count_cursuri);
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Date inexistente');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: ' || SQLERRM);
+END obtine_instructori_stil;
+/
+
+BEGIN
+    obtine_instructori_stil(1, 1);
+END;
+/
+
+BEGIN
+    obtine_instructori_stil(2, 2);
+END;
+/
+
+BEGIN
+    obtine_instructori_stil(999, 1);
+END;
+/
+
+BEGIN
+    obtine_instructori_stil(1, 999);
+END;
+/
+
+BEGIN
+    obtine_instructori_stil(13, 2);
+END;
+/
+
+
+-- *****************************************
+-- 10
+-- *****************************************
+
+
+CREATE OR REPLACE TRIGGER trg_elev_restrictii_orar
+BEFORE INSERT OR UPDATE OR DELETE ON Elev
+DECLARE
+    v_username VARCHAR2(100);
+    v_count_scoala NUMBER;
+BEGIN
+    IF TO_CHAR(SYSDATE, 'D') = 1 OR TO_CHAR(SYSDATE, 'HH24') NOT BETWEEN 9 AND 15 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Tabelul Elev poate fi actualizat doar intre orele 09:00 si 15:00, de luni pana sambata');
+    END IF;
+
+    SELECT USER INTO v_username FROM DUAL;
+
+    IF v_username NOT IN ('DENISA') THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Doar utilizatorul DENISA poate actualiza tabelul Elev');
+    END IF;
+
+    IF INSERTING OR UPDATING THEN
+        FOR rec IN (
+            SELECT DISTINCT id_scoala
+            FROM Elev
+        ) LOOP
+            SELECT COUNT(*)
+            INTO v_count_scoala
+            FROM Scoala
+            WHERE id_scoala = rec.id_scoala;
+
+            IF v_count_scoala = 0 THEN
+                RAISE_APPLICATION_ERROR(-20003, 'Nu exista scoala cu ID-ul specificat');
+            END IF;
+        END LOOP;
+    END IF;
+
+    IF INSERTING THEN
+        DBMS_OUTPUT.PUT_LINE('INSERT-ul a fost realizat');
+    ELSIF UPDATING THEN
+        DBMS_OUTPUT.PUT_LINE('UPDATE-ul a fost realizat');
+    ELSIF DELETING THEN
+        DBMS_OUTPUT.PUT_LINE('DELETE-ul a fost realizat');
+    END IF;
+END;
+/
+
+INSERT INTO Elev (id_elev, nume, prenume, data_nasterii, data_inscrierii, id_abonament, id_scoala)
+VALUES (elev_seq.NEXTVAL, 'Pacurariu', 'Ioana', TO_DATE('18-04-2006', 'DD-MM-YYYY'), SYSDATE, 1, 4);
+
+DROP TRIGGER trg_elev_restrictii_orar;
+
+
+-- *****************************************
+-- 11
+-- *****************************************
+
+
+CREATE OR REPLACE TRIGGER trg_elev_data_inscriere
+BEFORE UPDATE OF data_inscrierii ON Elev
+FOR EACH ROW
+BEGIN
+    IF :NEW.data_inscrierii > SYSDATE THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Data inscrierii unui elev nu poate fi in viitor');
+    END IF;
+
+    IF :NEW.data_inscrierii < :OLD.data_nasterii THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Data inscrierii nu poate fi mai devreme decat data nasterii elevului');
+    END IF;
+
+    IF :NEW.data_inscrierii IS NULL THEN
+        :NEW.data_inscrierii := SYSDATE;
+        DBMS_OUTPUT.PUT_LINE('Data inscrierii era NULL, setata automat la SYSDATE');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Data inscrierii este valida: ' || TO_CHAR(:NEW.data_inscrierii, 'DD-MM-YYYY'));
+    END IF;
+END;
+/
+
+UPDATE Elev
+SET data_inscrierii = TO_DATE('10-03-2023', 'DD-MM-YYYY')
+WHERE id_elev = 12;
+
+UPDATE Elev
+SET data_inscrierii = TO_DATE('20-03-2025', 'DD-MM-YYYY')
+WHERE id_elev = 12;
+
+UPDATE Elev
+SET data_inscrierii = TO_DATE('10-03-1990', 'DD-MM-YYYY')
+WHERE id_elev = 12;
+
+UPDATE Elev
+SET data_inscrierii = NULL
+WHERE id_elev = 12;
+
+DROP TRIGGER trg_elev_data_inscriere;
+
+
+-- *****************************************
+-- 12
+-- *****************************************
+
+
+CREATE TABLE audit_tabele (
+    utilizator VARCHAR2(30),
+    eveniment VARCHAR2(20),
+    nume_obiect VARCHAR2(30),
+    tip_obiect VARCHAR2(30),
+    data_operatiunii DATE
+);
+
+CREATE OR REPLACE TRIGGER trg_protectie_tabele
+AFTER DROP OR ALTER ON SCHEMA
+DECLARE
+    v_utilizator VARCHAR2(30);
+    v_eveniment VARCHAR2(20);
+    v_nume_obiect VARCHAR2(30);
+    v_tip_obiect VARCHAR2(30);
+BEGIN
+    v_utilizator := SYS.LOGIN_USER;
+    v_eveniment := ORA_SYSEVENT;
+    v_nume_obiect := ORA_DICT_OBJ_NAME;
+    v_tip_obiect := ORA_DICT_OBJ_TYPE;
+
+    IF v_eveniment = 'DROP' AND v_nume_obiect IN ('ELEV', 'PREDA', 'CURS', 'INSTRUCTOR') THEN
+        INSERT INTO audit_tabele (utilizator, eveniment, nume_obiect, tip_obiect, data_operatiunii)
+        VALUES (v_utilizator, v_eveniment, v_nume_obiect, v_tip_obiect, SYSDATE);
+
+        RAISE_APPLICATION_ERROR(-20011, 'Nu se poate sterge tabelul protejat: ' || v_nume_obiect);
+    END IF;
+
+    IF v_eveniment = 'ALTER' AND v_nume_obiect IN ('ELEV', 'PREDA', 'CURS', 'INSTRUCTOR') THEN
+        INSERT INTO audit_tabele (utilizator, eveniment, nume_obiect, tip_obiect, data_operatiunii)
+        VALUES (v_utilizator, v_eveniment, v_nume_obiect, v_tip_obiect, SYSDATE);
+
+        RAISE_APPLICATION_ERROR(-20012, 'Nu se poate modifica structura tabelului protejat: ' || v_nume_obiect);
+    END IF;
+
+    INSERT INTO audit_tabele (utilizator, eveniment, nume_obiect, tip_obiect, data_operatiunii)
+    VALUES (v_utilizator, v_eveniment, v_nume_obiect, v_tip_obiect, SYSDATE);
+
+    DBMS_OUTPUT.PUT_LINE('Eveniment permis: ' || v_eveniment || ' pe obiectul: ' || v_nume_obiect);
+END;
+/
+
+DROP TABLE Preda;
+
+ALTER TABLE Curs ADD durata INT;
+
+CREATE TABLE Test (id_test INT, descriere VARCHAR2(100));
+
+ALTER TABLE Test ADD durata INT;
+
+DROP TABLE Test;
+
+SELECT * FROM audit_tabele;
+
+DROP TRIGGER trg_protectie_tabele;
+
+
+-- *****************************************
+-- 13
+-- *****************************************
+
+
+CREATE OR REPLACE PACKAGE pkg_gestionare_competitii IS
+    TYPE premiu_table IS TABLE OF NUMBER;
+    TYPE competitie_record IS RECORD (
+        id_competitie NUMBER,
+        denumire VARCHAR2(100),
+        data_competitie DATE
+    );
+
+    FUNCTION calculeaza_premii_scoala(p_id_competitie NUMBER, p_id_scoala NUMBER) RETURN NUMBER;
+    FUNCTION verifica_eligibilitate_competitie(p_data DATE) RETURN BOOLEAN;
+
+    PROCEDURE inregistreaza_competitie(p_id_competitie NUMBER, p_denumire VARCHAR2, p_data DATE);
+    PROCEDURE genereaza_raport_competitii;
+END pkg_gestionare_competitii;
+/
+
+CREATE OR REPLACE PACKAGE BODY pkg_gestionare_competitii IS
+    FUNCTION calculeaza_premii_scoala(p_id_competitie NUMBER, p_id_scoala NUMBER) RETURN NUMBER IS
+        v_numar_premii NUMBER;
+    BEGIN
+        SELECT COUNT(p.premiu)
+        INTO v_numar_premii
+        FROM Participa p
+        JOIN Elev e ON p.id_elev = e.id_elev
+        WHERE p.id_competitie = p_id_competitie AND e.id_scoala = p_id_scoala;
+
+        RETURN v_numar_premii;
+    END;
+
+    FUNCTION verifica_eligibilitate_competitie(p_data DATE) RETURN BOOLEAN IS
+        v_numar_competitii NUMBER;
+    BEGIN
+        SELECT COUNT(*)
+        INTO v_numar_competitii
+        FROM Competitie
+        WHERE ABS(TRUNC(p_data) - TRUNC(data)) < 7;
+
+        RETURN v_numar_competitii = 0;
+    END;
+
+    PROCEDURE inregistreaza_competitie(p_id_competitie NUMBER, p_denumire VARCHAR2, p_data DATE) IS
+        v_eligibil BOOLEAN;
+    BEGIN
+        v_eligibil := verifica_eligibilitate_competitie(p_data);
+
+        IF NOT v_eligibil THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Competitia nu poate fi organizata. Exista deja o alta competitie planificata in aceeasi saptamana');
+        END IF;
+
+        INSERT INTO Competitie (id_competitie, denumire, data)
+        VALUES (p_id_competitie, p_denumire, p_data);
+
+        DBMS_OUTPUT.PUT_LINE('Competitia a fost inregistrata cu succes');
+    END;
+
+    PROCEDURE genereaza_raport_competitii IS
+        CURSOR c_competitii IS
+            SELECT c.id_competitie, c.denumire, c.data
+            FROM Competitie c;
+
+        v_competitie c_competitii%ROWTYPE;
+        v_numar_premii NUMBER;
+    BEGIN
+        OPEN c_competitii;
+        LOOP
+            FETCH c_competitii INTO v_competitie;
+            EXIT WHEN c_competitii%NOTFOUND;
+
+            DBMS_OUTPUT.PUT_LINE('Competitie: ' || v_competitie.denumire || ' | Data: ' || TO_CHAR(v_competitie.data, 'DD-MM-YYYY'));
+
+            SELECT COUNT(p.premiu)
+            INTO v_numar_premii
+            FROM Participa p
+            WHERE p.id_competitie = v_competitie.id_competitie;
+
+            DBMS_OUTPUT.PUT_LINE('  Total premii acordate: ' || v_numar_premii);
+            DBMS_OUTPUT.PUT_LINE('------------------------------');
+        END LOOP;
+        CLOSE c_competitii;
+    END;
+END pkg_gestionare_competitii;
+/
+
+
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Premii scoala: ' || pkg_gestionare_competitii.calculeaza_premii_scoala(1, 1));
+END;
+/
+
+BEGIN
+    pkg_gestionare_competitii.inregistreaza_competitie(competitie_seq.NEXTVAL, 'Bucurie in Miscare', TO_DATE('15-04-2025', 'DD-MM-YYYY'));
+END;
+/
+
+BEGIN
+    IF pkg_gestionare_competitii.verifica_eligibilitate_competitie(TO_DATE('17-04-2025', 'DD-MM-YYYY')) THEN
+        DBMS_OUTPUT.PUT_LINE('Competitia este eligibila');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Competitia NU este eligibila');
+    END IF;
+END;
+/
+
+BEGIN
+    pkg_gestionare_competitii.genereaza_raport_competitii;
+END;
+/
